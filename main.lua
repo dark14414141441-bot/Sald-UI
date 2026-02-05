@@ -5,30 +5,41 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
--- Função de Arrastar Otimizada para Delta (Mobile/PC)
-local function MakeDraggable(frame)
-    local dragging, dragInput, dragStart, startPos
-    frame.InputBegan:Connect(function(input)
+-- SISTEMA DE ARRASTO REFEITO (FIX PARA MOBILE/DELTA)
+local function MakeDraggable(gui)
+    local dragging
+    local dragInput
+    local dragStart
+    local startPos
+
+    local function update(input)
+        local delta = input.Position - dragStart
+        gui.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+    end
+
+    gui.InputBegan:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
             dragging = true
             dragStart = input.Position
-            startPos = frame.Position
+            startPos = gui.Position
+
+            input.Changed:Connect(function()
+                if input.UserInputState == Enum.UserInputState.End then
+                    dragging = false
+                end
+            end)
         end
     end)
-    frame.InputChanged:Connect(function(input)
+
+    gui.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
             dragInput = input
         end
     end)
+
     UserInputService.InputChanged:Connect(function(input)
         if input == dragInput and dragging then
-            local delta = input.Position - dragStart
-            frame.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
-        end
-    end)
-    frame.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            dragging = false
+            update(input)
         end
     end)
 end
@@ -44,14 +55,17 @@ function SaldUI:CreateWindow(hubName)
     local success, _ = pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
     if not success then ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui") end
 
-    -- Main Frame (550x380)
+    -- Frame Principal (550x380)
     local Main = Instance.new("Frame")
     Main.Name = "Main"
     Main.Size = UDim2.new(0, 550, 0, 380)
     Main.Position = UDim2.new(0.5, -275, 0.5, -190)
     Main.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
     Main.BorderSizePixel = 0
+    Main.Active = true -- Necessário para o drag funcionar
     Main.Parent = ScreenGui
+
+    -- Aplicar o Drag
     MakeDraggable(Main)
 
     Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 10)
@@ -92,7 +106,7 @@ function SaldUI:CreateWindow(hubName)
     Close.Font = Enum.Font.Gotham
     Close.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-    -- Sidebar e Container
+    -- Áreas de Conteúdo
     local Sidebar = Instance.new("ScrollingFrame", Main)
     Sidebar.Size = UDim2.new(0, 140, 1, -50)
     Sidebar.Position = UDim2.new(0, 5, 0, 45)
@@ -140,7 +154,7 @@ function SaldUI:CreateTab(name)
             end 
         end
         Page.Visible = true
-        TabBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255) -- Destaque Branco
+        TabBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
         TabBtn.TextColor3 = Color3.fromRGB(0, 0, 0)
     end
 
@@ -201,3 +215,4 @@ function SaldUI:CreateTab(name)
 end
 
 return SaldUI
+
