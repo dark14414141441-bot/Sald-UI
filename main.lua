@@ -57,7 +57,6 @@ function SaldUI:CreateWindow(hubName)
     Stroke.Color = Color3.fromRGB(60, 60, 60)
     Stroke.Thickness = 1.2
 
-    -- Header
     local Header = Instance.new("Frame", Main)
     Header.Size = UDim2.new(1, 0, 0, 42)
     Header.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
@@ -77,7 +76,7 @@ function SaldUI:CreateWindow(hubName)
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
     Title.BackgroundTransparency = 1
     Title.Font = Enum.Font.GothamBold
-    Title.TextSize = 16 -- Fonte maior no Título
+    Title.TextSize = 16
     Title.TextXAlignment = Enum.TextXAlignment.Left
 
     local Close = Instance.new("TextButton", Header)
@@ -86,11 +85,10 @@ function SaldUI:CreateWindow(hubName)
     Close.Position = UDim2.new(1, -45, 0, 0)
     Close.BackgroundTransparency = 1
     Close.TextColor3 = Color3.fromRGB(255, 255, 255)
-    Close.TextSize = 18 -- X maior
+    Close.TextSize = 18
     Close.Font = Enum.Font.GothamBold
     Close.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
-    -- Áreas
     local Sidebar = Instance.new("ScrollingFrame", Main)
     Sidebar.Size = UDim2.new(0, 140, 1, -55)
     Sidebar.Position = UDim2.new(0, 8, 0, 48)
@@ -124,9 +122,9 @@ function SaldUI:CreateTab(name)
     TabBtn.Text = name
     TabBtn.Size = UDim2.new(1, -10, 0, 36)
     TabBtn.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255) -- Letra Branca
+    TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabBtn.Font = Enum.Font.GothamBold
-    TabBtn.TextSize = 14 -- Fonte maior nas abas
+    TabBtn.TextSize = 14
     Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 6)
 
     local function Activate()
@@ -153,8 +151,8 @@ function SaldUI:CreateTab(name)
         B.Size = UDim2.new(1, -12, 0, 42)
         B.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
         B.TextColor3 = Color3.fromRGB(255, 255, 255)
-        B.Font = Enum.Font.GothamBold -- Fonte Bold
-        B.TextSize = 14 -- Fonte maior
+        B.Font = Enum.Font.GothamBold
+        B.TextSize = 16 -- Aumentado
         Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
         local S = Instance.new("UIStroke", B)
         S.Color = Color3.fromRGB(50, 50, 50)
@@ -164,17 +162,17 @@ function SaldUI:CreateTab(name)
     function Elements:CreateToggle(text, callback)
         local T = Instance.new("TextButton", Page)
         T.Text = "   " .. text
-        T.Size = UDim2.new(1, -12, 0, 42)
+        T.Size = UDim2.new(1, -12, 0, 45) -- Altura maior para o Toggle
         T.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
         T.TextColor3 = Color3.fromRGB(255, 255, 255)
         T.TextXAlignment = Enum.TextXAlignment.Left
         T.Font = Enum.Font.GothamBold
-        T.TextSize = 14 -- Fonte maior
+        T.TextSize = 16 -- Fonte bem maior para o Kill e outros
         Instance.new("UICorner", T).CornerRadius = UDim.new(0, 8)
         
         local Indicator = Instance.new("Frame", T)
-        Indicator.Size = UDim2.new(0, 24, 0, 24)
-        Indicator.Position = UDim2.new(1, -35, 0.5, -12)
+        Indicator.Size = UDim2.new(0, 26, 0, 26) -- Indicador maior
+        Indicator.Position = UDim2.new(1, -38, 0.5, -13)
         Indicator.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
         Instance.new("UICorner", Indicator).CornerRadius = UDim.new(0, 6)
 
@@ -191,9 +189,9 @@ function SaldUI:CreateTab(name)
         L.Text = text
         L.Size = UDim2.new(1, 0, 0, 30)
         L.BackgroundTransparency = 1
-        L.TextColor3 = Color3.fromRGB(255, 255, 255) -- Label Branca
+        L.TextColor3 = Color3.fromRGB(255, 255, 255)
         L.Font = Enum.Font.GothamBold
-        L.TextSize = 14
+        L.TextSize = 15 -- Label um pouco maior
     end
 
     return Elements
