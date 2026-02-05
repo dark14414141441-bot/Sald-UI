@@ -5,6 +5,7 @@ local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
 local UserInputService = game:GetService("UserInputService")
 
+-- // Função de Arrastar (Fix Mobile)
 local function MakeDraggable(gui)
     local dragging, dragInput, dragStart, startPos
     gui.InputBegan:Connect(function(input)
@@ -33,14 +34,16 @@ end
 function SaldUI:CreateWindow(hubName)
     local self = setmetatable({}, SaldUI)
     
+    -- ScreenGui principal
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "SaldUI"
+    ScreenGui.Name = "SaldUI_v2"
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
     ScreenGui.ResetOnSpawn = false
     
     local success, _ = pcall(function() ScreenGui.Parent = game:GetService("CoreGui") end)
     if not success then ScreenGui.Parent = Players.LocalPlayer:WaitForChild("PlayerGui") end
 
+    -- Frame Principal
     local Main = Instance.new("Frame")
     Main.Name = "Main"
     Main.Size = UDim2.new(0, 550, 0, 380)
@@ -56,7 +59,9 @@ function SaldUI:CreateWindow(hubName)
     MainStroke.Color = Color3.fromRGB(45, 45, 45)
     MainStroke.Thickness = 1.5
 
+    -- Header
     local Header = Instance.new("Frame", Main)
+    Header.Name = "Header"
     Header.Size = UDim2.new(1, 0, 0, 42)
     Header.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
     Header.BorderSizePixel = 0
@@ -82,21 +87,22 @@ function SaldUI:CreateWindow(hubName)
     Close.Font = Enum.Font.GothamBold
     Close.MouseButton1Click:Connect(function() ScreenGui:Destroy() end)
 
+    -- Sidebar
     local Sidebar = Instance.new("ScrollingFrame", Main)
+    Sidebar.Name = "Sidebar"
     Sidebar.Size = UDim2.new(0, 150, 1, -60)
     Sidebar.Position = UDim2.new(0, 10, 0, 50)
     Sidebar.BackgroundTransparency = 1
     Sidebar.ScrollBarThickness = 0
-    Sidebar.Parent = Main
     local SideLayout = Instance.new("UIListLayout", Sidebar)
     SideLayout.Padding = UDim.new(0, 6)
 
+    -- Container de Páginas
     local Container = Instance.new("Frame", Main)
-    Container.Name = "Container"
+    Container.Name = "PageContainer"
     Container.Size = UDim2.new(1, -180, 1, -60)
     Container.Position = UDim2.new(0, 170, 0, 50)
     Container.BackgroundTransparency = 1
-    Container.Parent = Main
 
     self.Container = Container
     self.Sidebar = Sidebar
@@ -107,31 +113,33 @@ end
 
 function SaldUI:CreateTab(name)
     local Page = Instance.new("ScrollingFrame")
-    Page.Name = name .. "Page"
+    Page.Name = name .. "_Page"
     Page.Size = UDim2.new(1, 0, 1, 0)
     Page.BackgroundTransparency = 1
     Page.Visible = false
     Page.ScrollBarThickness = 0
     Page.AutomaticCanvasSize = Enum.AutomaticCanvasSize.Y
-    Page.Parent = self.Container
+    Page.Parent = self.Container -- Parentesco imediato
     
     local PageLayout = Instance.new("UIListLayout", Page)
     PageLayout.Padding = UDim.new(0, 10)
     PageLayout.HorizontalAlignment = Enum.HorizontalAlignment.Center
 
     local TabBtn = Instance.new("TextButton")
-    TabBtn.Name = name .. "TabBtn"
+    TabBtn.Name = name .. "_TabBtn"
     TabBtn.Text = name
     TabBtn.Size = UDim2.new(1, -10, 0, 40)
     TabBtn.BackgroundColor3 = Color3.fromRGB(22, 22, 22)
     TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
     TabBtn.Font = Enum.Font.GothamBold
     TabBtn.TextSize = 15
-    TabBtn.Parent = self.Sidebar
+    TabBtn.Parent = self.Sidebar -- Parentesco imediato
     Instance.new("UICorner", TabBtn).CornerRadius = UDim.new(0, 8)
 
     local function Activate()
-        for _, v in pairs(self.Container:GetChildren()) do if v:IsA("ScrollingFrame") then v.Visible = false end end
+        for _, v in pairs(self.Container:GetChildren()) do 
+            if v:IsA("ScrollingFrame") then v.Visible = false end 
+        end
         for _, v in pairs(self.Sidebar:GetChildren()) do 
             if v:IsA("TextButton") then 
                 v.BackgroundColor3 = Color3.fromRGB(22, 22, 22) 
@@ -156,10 +164,9 @@ function SaldUI:CreateTab(name)
         B.TextColor3 = Color3.fromRGB(255, 255, 255)
         B.Font = Enum.Font.GothamBold
         B.TextSize = 16
-        B.Parent = Page
+        B.Parent = Page -- Parentesco imediato
         Instance.new("UICorner", B).CornerRadius = UDim.new(0, 8)
-        local BStroke = Instance.new("UIStroke", B)
-        BStroke.Color = Color3.fromRGB(60, 60, 60)
+        Instance.new("UIStroke", B).Color = Color3.fromRGB(60, 60, 60)
         B.MouseButton1Click:Connect(callback)
     end
 
@@ -167,16 +174,15 @@ function SaldUI:CreateTab(name)
         local state = false
         local T = Instance.new("TextButton")
         T.Text = "     " .. text
-        T.Size = UDim2.new(1, -15, 0, 48)
+        T.Size = UDim2.new(1, -15, 0, 50)
         T.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
         T.TextColor3 = Color3.fromRGB(255, 255, 255)
         T.TextXAlignment = Enum.TextXAlignment.Left
         T.Font = Enum.Font.GothamBold
         T.TextSize = 16
-        T.Parent = Page
+        T.Parent = Page -- Parentesco imediato
         Instance.new("UICorner", T).CornerRadius = UDim.new(0, 8)
-        local TStroke = Instance.new("UIStroke", T)
-        TStroke.Color = Color3.fromRGB(60, 60, 60)
+        Instance.new("UIStroke", T).Color = Color3.fromRGB(60, 60, 60)
 
         local Switch = Instance.new("Frame", T)
         Switch.Size = UDim2.new(0, 42, 0, 22)
@@ -201,12 +207,12 @@ function SaldUI:CreateTab(name)
     function Elements:CreateLabel(text)
         local L = Instance.new("TextLabel")
         L.Text = text
-        L.Size = UDim2.new(1, 0, 0, 30)
+        L.Size = UDim2.new(1, 0, 0, 35)
         L.BackgroundTransparency = 1
         L.TextColor3 = Color3.fromRGB(255, 255, 255)
         L.Font = Enum.Font.GothamBold
         L.TextSize = 16
-        L.Parent = Page
+        L.Parent = Page -- Parentesco imediato
     end
 
     return Elements
