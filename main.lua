@@ -2,53 +2,32 @@ local SaldLib = {}
 local UserInputService = game:GetService("UserInputService")
 local GuiService = game:GetService("GuiService")
 
--- Mata a seleção azul do sistema do Roblox pra sempre
+-- REMOVE BORDA AZUL GLOBALMENTE
 GuiService.AutoSelectGuiEnabled = false
 GuiService.SelectedObject = nil
 
 function SaldLib:CreateWindow()
-    for _, v in pairs(game.CoreGui:GetChildren()) do
-        if v.Name == "SaldHub_Final" then v:Destroy() end
+    -- Limpa UI antiga
+    if game.CoreGui:FindFirstChild("SaldHub_Lib") then
+        game.CoreGui.SaldHub_Lib:Destroy()
     end
 
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "SaldHub_Final"
+    ScreenGui.Name = "SaldHub_Lib"
     ScreenGui.Parent = game.CoreGui
     ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-    -- Botão Flutuante (Arredondado e Arrastável)
-    local OpenBtn = Instance.new("TextButton")
-    OpenBtn.Parent = ScreenGui
-    OpenBtn.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
-    OpenBtn.Size = UDim2.new(0, 55, 0, 55)
-    OpenBtn.Position = UDim2.new(0.05, 0, 0.2, 0)
-    OpenBtn.Text = "SALD"
-    OpenBtn.Font = Enum.Font.GothamBold
-    OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    OpenBtn.TextSize = 14
-    OpenBtn.Active = true
-    OpenBtn.Draggable = true -- Fallback para mobile
-    local BtnCorner = Instance.new("UICorner", OpenBtn)
-    BtnCorner.CornerRadius = UDim.new(0, 12)
+    -- FUNÇÕES AUXILIARES
+    local function KillBlue(obj)
+        local frame = Instance.new("Frame")
+        frame.BackgroundTransparency = 1
+        obj.SelectionImageObject = frame
+        obj.SelectionGroup = false
+    end
 
-    -- Janela Principal
-    local Main = Instance.new("Frame")
-    Main.Name = "Main"
-    Main.Parent = ScreenGui
-    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-    Main.Size = UDim2.new(0, 500, 0, 350)
-    Main.Position = UDim2.new(0.3, 0, 0.2, 0)
-    Main.Visible = false
-    Main.Active = true
-    local MainCorner = Instance.new("UICorner", Main)
-    MainCorner.CornerRadius = UDim.new(0, 6)
-
-    OpenBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
-
-    -- Função de Arrasto Universal (Robusta)
-    local function MakeDraggable(obj)
+    local function MakeDraggable(obj, dragHandle)
         local dragging, dragInput, dragStart, startPos
-        obj.InputBegan:Connect(function(input)
+        dragHandle.InputBegan:Connect(function(input)
             if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
                 dragging = true
                 dragStart = input.Position
@@ -58,213 +37,293 @@ function SaldLib:CreateWindow()
                 end)
             end
         end)
+        dragHandle.InputChanged:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                dragInput = input
+            end
+        end)
         UserInputService.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then
+            if input == dragInput and dragging then
                 local delta = input.Position - dragStart
                 obj.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
             end
         end)
     end
-    MakeDraggable(Main)
 
-    -- Header
+    -- 1. BOTÃO FLUTUANTE (REDONDO)
+    local FloatBtn = Instance.new("TextButton")
+    FloatBtn.Name = "OpenBtn"
+    FloatBtn.Parent = ScreenGui
+    FloatBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+    FloatBtn.Size = UDim2.new(0, 50, 0, 50)
+    FloatBtn.Position = UDim2.new(0.1, 0, 0.1, 0)
+    FloatBtn.Text = "S"
+    FloatBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    FloatBtn.TextSize = 20
+    FloatBtn.Font = Enum.Font.GothamBold
+    KillBlue(FloatBtn)
+    
+    local FloatCorner = Instance.new("UICorner")
+    FloatCorner.CornerRadius = UDim.new(1, 0) -- CIRCULO PERFEITO
+    FloatCorner.Parent = FloatBtn
+    
+    MakeDraggable(FloatBtn, FloatBtn) -- Arrastável
+
+    -- 2. MAIN FRAME (REDONDO)
+    local Main = Instance.new("Frame")
+    Main.Name = "Main"
+    Main.Parent = ScreenGui
+    Main.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+    Main.Size = UDim2.new(0, 500, 0, 350)
+    Main.Position = UDim2.new(0.3, 0, 0.3, 0)
+    Main.Visible = false
+    
+    local MainCorner = Instance.new("UICorner")
+    MainCorner.CornerRadius = UDim.new(0, 8)
+    MainCorner.Parent = Main
+
+    -- Header (Arrastável)
+    local Header = Instance.new("Frame")
+    Header.Size = UDim2.new(1, 0, 0, 40)
+    Header.BackgroundTransparency = 1
+    Header.Parent = Main
+    MakeDraggable(Main, Header)
+
     local Title = Instance.new("TextLabel")
-    Title.Parent = Main
-    Title.Size = UDim2.new(1, -15, 0, 40)
-    Title.Position = UDim2.new(0, 15, 0, 0)
-    Title.Text = "SALD HUB | PRECISÃO"
-    Title.Font = Enum.Font.GothamBold
+    Title.Parent = Header
+    Title.Text = "SALD HUB | LIBRARY"
     Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.Font = Enum.Font.GothamBold
     Title.TextSize = 14
+    Title.Size = UDim2.new(1, -20, 1, 0)
+    Title.Position = UDim2.new(0, 15, 0, 0)
     Title.TextXAlignment = Enum.TextXAlignment.Left
     Title.BackgroundTransparency = 1
 
-    -- Container de Tabs (Quadrado e Colado)
-    local TabScroll = Instance.new("ScrollingFrame")
-    TabScroll.Parent = Main
-    TabScroll.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    TabScroll.BorderSizePixel = 0 -- SEM UICORNER NAS TABS
-    TabScroll.Position = UDim2.new(0, 0, 0, 40)
-    TabScroll.Size = UDim2.new(1, 0, 0, 35)
-    TabScroll.ScrollBarThickness = 0
-    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
-    local TabList = Instance.new("UIListLayout", TabScroll)
+    -- Lógica Abrir/Fechar
+    FloatBtn.MouseButton1Click:Connect(function()
+        Main.Visible = not Main.Visible
+    end)
+
+    -- 3. TAB CONTAINER (QUADRADO E COLADO)
+    local TabContainer = Instance.new("ScrollingFrame")
+    TabContainer.Parent = Main
+    TabContainer.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+    TabContainer.Position = UDim2.new(0, 0, 0, 40)
+    TabContainer.Size = UDim2.new(1, 0, 0, 35)
+    TabContainer.ScrollBarThickness = 0
+    TabContainer.AutomaticCanvasSize = Enum.AutomaticSize.X
+    TabContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+    TabContainer.BorderSizePixel = 0 -- SEM BORDA
+
+    local TabList = Instance.new("UIListLayout")
+    TabList.Parent = TabContainer
     TabList.FillDirection = Enum.FillDirection.Horizontal
+    TabList.Padding = UDim.new(0, 0) -- COLADO
+    TabList.SortOrder = Enum.SortOrder.LayoutOrder
 
-    local Content = Instance.new("Frame")
-    Content.Parent = Main
-    Content.BackgroundTransparency = 1
-    Content.Position = UDim2.new(0, 10, 0, 85)
-    Content.Size = UDim2.new(1, -20, 1, -95)
+    local ContentContainer = Instance.new("Frame")
+    ContentContainer.Parent = Main
+    ContentContainer.BackgroundTransparency = 1
+    ContentContainer.Position = UDim2.new(0, 10, 0, 85)
+    ContentContainer.Size = UDim2.new(1, -20, 1, -95)
 
-    -- Função para limpar borda azul de qualquer objeto
-    local function NoBlue(obj)
-        obj.SelectionImageObject = Instance.new("Frame")
-        obj.SelectionImageObject.Transparency = 1
-        obj.SelectionGroup = false
-    end
+    -- RETORNO DA JANELA
+    local WindowFunctions = {}
 
-    local Tabs = {}
-    function Tabs:CreateTab(name)
+    function WindowFunctions:CreateTab(name)
+        -- BOTÃO DA TAB (QUADRADO - SEM UICORNER)
         local TabBtn = Instance.new("TextButton")
-        TabBtn.Parent = TabScroll
+        TabBtn.Parent = TabContainer
         TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-        TabBtn.BorderSizePixel = 1
-        TabBtn.BorderColor3 = Color3.fromRGB(45, 45, 45)
-        TabBtn.Size = UDim2.new(0, 110, 1, 0)
-        TabBtn.Text = tostring(name):upper()
+        TabBtn.Size = UDim2.new(0, 120, 1, 0) -- Largura fixa
+        TabBtn.Text = name:upper()
+        TabBtn.TextColor3 = Color3.fromRGB(150, 150, 150)
         TabBtn.Font = Enum.Font.SourceSansBold
-        TabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
         TabBtn.TextSize = 14
-        NoBlue(TabBtn)
+        TabBtn.BorderSizePixel = 0
+        KillBlue(TabBtn)
 
+        -- PÁGINA
         local Page = Instance.new("ScrollingFrame")
-        Page.Parent = Content
+        Page.Parent = ContentContainer
         Page.Size = UDim2.new(1, 0, 1, 0)
         Page.BackgroundTransparency = 1
         Page.Visible = false
-        Page.ScrollBarThickness = 3
+        Page.ScrollBarThickness = 2
         Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        Instance.new("UIListLayout", Page).Padding = UDim.new(0, 5)
+        
+        local PageList = Instance.new("UIListLayout")
+        PageList.Parent = Page
+        PageList.Padding = UDim.new(0, 5)
 
+        -- Lógica de Clique na Tab
         TabBtn.MouseButton1Click:Connect(function()
-            for _, p in pairs(Content:GetChildren()) do if p:IsA("ScrollingFrame") then p.Visible = false end end
-            for _, t in pairs(TabScroll:GetChildren()) do if t:IsA("TextButton") then t.BackgroundColor3 = Color3.fromRGB(30, 30, 30) end end
+            -- Esconde todas as páginas
+            for _, v in pairs(ContentContainer:GetChildren()) do
+                if v:IsA("ScrollingFrame") then v.Visible = false end
+            end
+            -- Reseta cor de todas as tabs
+            for _, v in pairs(TabContainer:GetChildren()) do
+                if v:IsA("TextButton") then
+                    v.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+                    v.TextColor3 = Color3.fromRGB(150, 150, 150)
+                end
+            end
+            -- Ativa a atual
             Page.Visible = true
-            TabBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+            TabBtn.BackgroundColor3 = Color3.fromRGB(45, 45, 45) -- Cor de destaque
+            TabBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
         end)
 
-        local Elements = {}
+        local ElementFunctions = {}
 
-        -- TOGGLE COM UICORNER
-        function Elements:CreateToggle(text, callback)
-            local Tgl = Instance.new("TextButton")
-            Tgl.Size = UDim2.new(1, 0, 0, 38)
-            Tgl.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-            Tgl.BorderSizePixel = 0
-            Tgl.Text = "    " .. text
-            Tgl.Font = Enum.Font.SourceSansBold
-            Tgl.TextColor3 = Color3.fromRGB(200, 200, 200)
-            Tgl.TextSize = 16
-            Tgl.TextXAlignment = Enum.TextXAlignment.Left
-            Tgl.Parent = Page
-            NoBlue(Tgl)
-            Instance.new("UICorner", Tgl).CornerRadius = UDim.new(0, 6)
-
-            local Box = Instance.new("Frame")
-            Box.Size = UDim2.new(0, 20, 0, 20)
-            Box.Position = UDim2.new(1, -30, 0.5, -10)
-            Box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
-            Box.Parent = Tgl
-            Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+        -- TOGGLE (REDONDO)
+        function ElementFunctions:CreateToggle(text, callback)
+            local TglBtn = Instance.new("TextButton")
+            TglBtn.Parent = Page
+            TglBtn.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+            TglBtn.Size = UDim2.new(1, 0, 0, 40)
+            TglBtn.Text = "   " .. text
+            TglBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
+            TglBtn.TextSize = 14
+            TglBtn.TextXAlignment = Enum.TextXAlignment.Left
+            TglBtn.Font = Enum.Font.SourceSansBold
+            KillBlue(TglBtn)
             
+            local TglCorner = Instance.new("UICorner")
+            TglCorner.CornerRadius = UDim.new(0, 6)
+            TglCorner.Parent = TglBtn
+
+            local Status = Instance.new("Frame")
+            Status.Size = UDim2.new(0, 20, 0, 20)
+            Status.Position = UDim2.new(1, -30, 0.5, -10)
+            Status.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            Status.Parent = TglBtn
+            Instance.new("UICorner", Status).CornerRadius = UDim.new(0, 4)
+
             local Check = Instance.new("Frame")
-            Check.Size = UDim2.new(1, -6, 1, -6)
-            Check.Position = UDim2.new(0, 3, 0, 3)
+            Check.Size = UDim2.new(1, -4, 1, -4)
+            Check.Position = UDim2.new(0, 2, 0, 2)
             Check.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
             Check.BackgroundTransparency = 1
-            Check.Parent = Box
+            Check.Parent = Status
             Instance.new("UICorner", Check).CornerRadius = UDim.new(0, 4)
 
-            local on = false
-            Tgl.MouseButton1Click:Connect(function()
-                on = not on
-                Check.BackgroundTransparency = on and 0 or 1
-                callback(on)
+            local enabled = false
+            TglBtn.MouseButton1Click:Connect(function()
+                enabled = not enabled
+                Check.BackgroundTransparency = enabled and 0 or 1
+                callback(enabled)
             end)
         end
 
-        -- SLIDER COM UICORNER
-        function Elements:CreateSlider(text, min, max, callback)
-            local SFrame = Instance.new("Frame")
-            SFrame.Size = UDim2.new(1, 0, 0, 55)
-            SFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-            SFrame.BorderSizePixel = 0
-            SFrame.Parent = Page
-            Instance.new("UICorner", SFrame).CornerRadius = UDim.new(0, 6)
+        -- SLIDER (REDONDO)
+        function ElementFunctions:CreateSlider(text, min, max, callback)
+            local SliderFrame = Instance.new("Frame")
+            SliderFrame.Parent = Page
+            SliderFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+            SliderFrame.Size = UDim2.new(1, 0, 0, 50)
+            
+            local SlCorner = Instance.new("UICorner")
+            SlCorner.CornerRadius = UDim.new(0, 6)
+            SlCorner.Parent = SliderFrame
 
-            local Lab = Instance.new("TextLabel")
-            Lab.Size = UDim2.new(1, 0, 0, 30)
-            Lab.Position = UDim2.new(0, 12, 0, 0)
-            Lab.Text = text .. ": " .. min
-            Lab.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Lab.BackgroundTransparency = 1
-            Lab.Font = Enum.Font.SourceSansBold
-            Lab.TextSize = 15
-            Lab.TextXAlignment = Enum.TextXAlignment.Left
-            Lab.Parent = SFrame
+            local Label = Instance.new("TextLabel")
+            Label.Parent = SliderFrame
+            Label.BackgroundTransparency = 1
+            Label.Position = UDim2.new(0, 10, 0, 5)
+            Label.Size = UDim2.new(1, -20, 0, 20)
+            Label.Text = text .. ": " .. min
+            Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Label.Font = Enum.Font.SourceSansBold
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.TextSize = 14
 
-            local Rail = Instance.new("TextButton")
-            Rail.Size = UDim2.new(1, -24, 0, 6)
-            Rail.Position = UDim2.new(0, 12, 0, 35)
-            Rail.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
-            Rail.Text = ""
-            Rail.Parent = SFrame
-            NoBlue(Rail)
-            Instance.new("UICorner", Rail)
+            local SlideBtn = Instance.new("TextButton")
+            SlideBtn.Parent = SliderFrame
+            SlideBtn.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
+            SlideBtn.Size = UDim2.new(1, -20, 0, 8)
+            SlideBtn.Position = UDim2.new(0, 10, 0, 30)
+            SlideBtn.Text = ""
+            SlideBtn.AutoButtonColor = false
+            KillBlue(SlideBtn)
+            Instance.new("UICorner", SlideBtn).CornerRadius = UDim.new(0, 10)
 
             local Fill = Instance.new("Frame")
-            Fill.Size = UDim2.new(0, 0, 1, 0)
+            Fill.Parent = SlideBtn
             Fill.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-            Fill.Parent = Rail
-            Instance.new("UICorner", Fill)
+            Fill.Size = UDim2.new(0, 0, 1, 0)
+            Instance.new("UICorner", Fill).CornerRadius = UDim.new(0, 10)
 
-            local function Update()
-                local pos = math.clamp((UserInputService:GetMouseLocation().X - Rail.AbsolutePosition.X) / Rail.AbsoluteSize.X, 0, 1)
+            local function Update(input)
+                local pos = math.clamp((input.Position.X - SlideBtn.AbsolutePosition.X) / SlideBtn.AbsoluteSize.X, 0, 1)
                 local val = math.floor(min + (max - min) * pos)
                 Fill.Size = UDim2.new(pos, 0, 1, 0)
-                Lab.Text = text .. ": " .. val
+                Label.Text = text .. ": " .. val
                 callback(val)
             end
 
-            Rail.InputBegan:Connect(function(input)
+            SlideBtn.InputBegan:Connect(function(input)
                 if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-                    local move = UserInputService.InputChanged:Connect(function(i)
-                        if i.UserInputType == Enum.UserInputType.MouseMovement or i.UserInputType == Enum.UserInputType.Touch then Update() end
+                    Update(input)
+                    local move = UserInputService.InputChanged:Connect(function(input)
+                        if input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch then
+                            Update(input)
+                        end
                     end)
-                    input.Changed:Connect(function() if input.UserInputState == Enum.UserInputState.End then move:Disconnect() end end)
-                    Update()
+                    local release
+                    release = input.Changed:Connect(function()
+                        if input.UserInputState == Enum.UserInputState.End then
+                            move:Disconnect()
+                            release:Disconnect()
+                        end
+                    end)
                 end
             end)
         end
 
-        -- INPUT COM UICORNER
-        function Elements:CreateInput(text, placeholder, callback)
-            local IFrame = Instance.new("Frame")
-            IFrame.Size = UDim2.new(1, 0, 0, 45)
-            IFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
-            IFrame.BorderSizePixel = 0
-            IFrame.Parent = Page
-            Instance.new("UICorner", IFrame).CornerRadius = UDim.new(0, 6)
+        -- INPUT (REDONDO)
+        function ElementFunctions:CreateInput(text, placeholder, callback)
+            local InputFrame = Instance.new("Frame")
+            InputFrame.Parent = Page
+            InputFrame.BackgroundColor3 = Color3.fromRGB(28, 28, 28)
+            InputFrame.Size = UDim2.new(1, 0, 0, 45)
+            Instance.new("UICorner", InputFrame).CornerRadius = UDim.new(0, 6)
 
-            local Lab = Instance.new("TextLabel")
-            Lab.Size = UDim2.new(0, 120, 1, 0)
-            Lab.Position = UDim2.new(0, 12, 0, 0)
-            Lab.Text = text
-            Lab.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Lab.BackgroundTransparency = 1
-            Lab.Font = Enum.Font.SourceSansBold
-            Lab.TextSize = 15
-            Lab.TextXAlignment = Enum.TextXAlignment.Left
-            Lab.Parent = IFrame
+            local Label = Instance.new("TextLabel")
+            Label.Parent = InputFrame
+            Label.Text = text
+            Label.TextColor3 = Color3.fromRGB(255, 255, 255)
+            Label.BackgroundTransparency = 1
+            Label.Position = UDim2.new(0, 10, 0, 0)
+            Label.Size = UDim2.new(0.4, 0, 1, 0)
+            Label.TextXAlignment = Enum.TextXAlignment.Left
+            Label.Font = Enum.Font.SourceSansBold
+            Label.TextSize = 14
 
             local Box = Instance.new("TextBox")
-            Box.Size = UDim2.new(0, 160, 0, 28)
-            Box.Position = UDim2.new(1, -170, 0.5, -14)
-            Box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            Box.Text = ""
+            Box.Parent = InputFrame
+            Box.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+            Box.Size = UDim2.new(0.5, 0, 0.6, 0)
+            Box.Position = UDim2.new(0.45, 0, 0.2, 0)
             Box.PlaceholderText = placeholder
+            Box.Text = ""
             Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Box.Parent = IFrame
-            NoBlue(Box)
-            Instance.new("UICorner", Box)
-            Box.FocusLost:Connect(function() callback(Box.Text) end)
+            Box.Font = Enum.Font.SourceSans
+            KillBlue(Box)
+            Instance.new("UICorner", Box).CornerRadius = UDim.new(0, 4)
+
+            Box.FocusLost:Connect(function()
+                callback(Box.Text)
+            end)
         end
 
-        return Elements
+        return ElementFunctions
     end
-    return Tabs
+
+    return WindowFunctions
 end
 
 return SaldLib
+
