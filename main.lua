@@ -1,152 +1,184 @@
-local SaldLib = {}
-local UserInputService = game:GetService("UserInputService")
+local SaldHub = {}
 
-function SaldLib:CreateWindow()
-    for _, v in pairs(game.CoreGui:GetChildren()) do
-        if v.Name == "SaldHub_Final" then v:Destroy() end
-    end
-
+function SaldHub:CreateWindow()
     local ScreenGui = Instance.new("ScreenGui")
-    ScreenGui.Name = "SaldHub_Final"
-    ScreenGui.Parent = game.CoreGui
+    local MainFrame = Instance.new("Frame")
+    local MainCorner = Instance.new("UICorner")
+    local LogoBtn = Instance.new("TextButton")
+    local LogoCorner = Instance.new("UICorner")
+    local LogoGradient = Instance.new("UIGradient")
+    local Sidebar = Instance.new("ScrollingFrame")
+    local UIListLayout = Instance.new("UIListLayout")
+    local Title = Instance.new("TextLabel")
+    local ContentContainer = Instance.new("Frame")
 
-    -- BOTÃO FLUTUANTE (ABRIR/FECHAR)
-    local OpenBtn = Instance.new("TextButton")
-    OpenBtn.Parent = ScreenGui
-    OpenBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-    OpenBtn.Size = UDim2.new(0, 60, 0, 60)
-    OpenBtn.Position = UDim2.new(0.05, 0, 0.1, 0)
-    OpenBtn.Text = "SALD"
-    OpenBtn.Font = Enum.Font.GothamBold
-    OpenBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-    OpenBtn.TextSize = 14
-    OpenBtn.Draggable = true
-    Instance.new("UICorner", OpenBtn).CornerRadius = UDim.new(0, 15)
+    ScreenGui.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+    ScreenGui.Name = "SaldHub_Lib"
+    ScreenGui.ResetOnSpawn = false
 
-    -- JANELA PRINCIPAL (Aumentada para 550x400)
-    local Main = Instance.new("Frame")
-    Main.Name = "Main"
-    Main.Parent = ScreenGui
-    Main.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
-    Main.Size = UDim2.new(0, 550, 0, 400) -- MENU MAIOR
-    Main.Position = UDim2.new(0.3, 0, 0.2, 0)
-    Main.Visible = false
-    Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 8)
+    -- --- BOTÃO "S" (LOGO) ---
+    LogoBtn.Name = "S_Logo"
+    LogoBtn.Parent = ScreenGui
+    LogoBtn.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+    LogoBtn.Position = UDim2.new(0, 50, 0, 50)
+    LogoBtn.Size = UDim2.new(0, 55, 0, 55)
+    LogoBtn.Font = Enum.Font.GothamBold
+    LogoBtn.Text = "S"
+    LogoBtn.TextSize = 35
+    LogoBtn.Active = true
+    LogoBtn.Draggable = true 
 
-    OpenBtn.MouseButton1Click:Connect(function() Main.Visible = not Main.Visible end)
+    LogoCorner.CornerRadius = UDim.new(0, 15)
+    LogoCorner.Parent = LogoBtn
 
-    -- CONTAINER DE TABS COM DIVISÃO
-    local TabScroll = Instance.new("ScrollingFrame")
-    TabScroll.Parent = Main
-    TabScroll.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
-    TabScroll.Position = UDim2.new(0, 0, 0, 40)
-    TabScroll.Size = UDim2.new(1, 0, 0, 45) -- TABS MAIORES
-    TabScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-    TabScroll.AutomaticCanvasSize = Enum.AutomaticSize.X
-    TabScroll.ScrollBarThickness = 2
-    TabScroll.BorderSizePixel = 0
+    LogoGradient.Color = ColorSequence.new({
+        ColorSequenceKeypoint.new(0, Color3.fromRGB(0, 80, 200)), -- Azul
+        ColorSequenceKeypoint.new(1, Color3.fromRGB(40, 40, 40))  -- Cinza
+    })
+    LogoGradient.Rotation = 45
+    LogoGradient.Parent = LogoBtn
 
-    local TabList = Instance.new("UIListLayout", TabScroll)
-    TabList.FillDirection = Enum.FillDirection.Horizontal
+    -- --- MENU PRINCIPAL ---
+    MainFrame.Name = "MainFrame"
+    MainFrame.Parent = ScreenGui
+    MainFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
+    MainFrame.BackgroundTransparency = 0.05
+    MainFrame.Position = UDim2.new(0.5, -250, 0.5, -175)
+    MainFrame.Size = UDim2.new(0, 550, 0, 350)
+    MainFrame.Visible = true
+    MainFrame.Active = true
+    MainFrame.Draggable = true
 
-    local Content = Instance.new("Frame")
-    Content.Parent = Main
-    Content.BackgroundTransparency = 1
-    Content.Position = UDim2.new(0, 15, 0, 100)
-    Content.Size = UDim2.new(1, -30, 1, -115)
+    MainCorner.CornerRadius = UDim.new(0, 12)
+    MainCorner.Parent = MainFrame
 
-    local function NoBlue(obj)
-        obj.SelectionImageObject = Instance.new("Frame")
-        obj.SelectionImageObject.Transparency = 1
-    end
+    -- Título Sald Hub
+    Title.Parent = MainFrame
+    Title.BackgroundTransparency = 1
+    Title.Position = UDim2.new(0, 20, 0, 10)
+    Title.Size = UDim2.new(0, 200, 0, 30)
+    Title.Font = Enum.Font.GothamBold
+    Title.Text = "Sald <font color='#0050C8'>Hub</font>"
+    Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+    Title.TextSize = 20
+    Title.RichText = true
+    Title.TextXAlignment = Enum.TextXAlignment.Left
+
+    -- Sidebar
+    Sidebar.Name = "Sidebar"
+    Sidebar.Parent = MainFrame
+    Sidebar.BackgroundTransparency = 1
+    Sidebar.Position = UDim2.new(0, 10, 0, 50)
+    Sidebar.Size = UDim2.new(0, 160, 1, -60)
+    Sidebar.ScrollBarThickness = 0
+
+    UIListLayout.Parent = Sidebar
+    UIListLayout.Padding = UDim.new(0, 5)
+
+    -- Container de Conteúdo (Onde os scripts aparecem)
+    ContentContainer.Name = "Content"
+    ContentContainer.Parent = MainFrame
+    ContentContainer.BackgroundTransparency = 1
+    ContentContainer.Position = UDim2.new(0, 180, 0, 50)
+    ContentContainer.Size = UDim2.new(1, -190, 1, -60)
+
+    -- Toggle Menu
+    LogoBtn.MouseButton1Click:Connect(function()
+        MainFrame.Visible = not MainFrame.Visible
+    end)
 
     local Tabs = {}
+    local FirstTab = true
+
     function Tabs:CreateTab(name)
         local TabBtn = Instance.new("TextButton")
-        TabBtn.Parent = TabScroll
-        TabBtn.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-        TabBtn.Size = UDim2.new(0, 120, 1, 0)
-        TabBtn.BorderSizePixel = 1 -- LINHA DE DIVISÃO
-        TabBtn.BorderColor3 = Color3.fromRGB(60, 60, 60) -- COR DA DIVISÃO
-        TabBtn.Text = name:upper()
-        TabBtn.Font = Enum.Font.GothamBold
-        TabBtn.TextColor3 = Color3.fromRGB(200, 200, 200)
-        TabBtn.TextSize = 14
-        NoBlue(TabBtn)
+        local TabCorner = Instance.new("UICorner")
+        local TabPage = Instance.new("ScrollingFrame")
+        local TabList = Instance.new("UIListLayout")
 
-        local Page = Instance.new("ScrollingFrame")
-        Page.Parent = Content
-        Page.Size = UDim2.new(1, 0, 1, 0)
-        Page.BackgroundTransparency = 1
-        Page.Visible = false
-        Page.ScrollBarThickness = 4
-        Page.AutomaticCanvasSize = Enum.AutomaticSize.Y
-        Instance.new("UIListLayout", Page).Padding = UDim.new(0, 8)
+        -- Botão da Aba
+        TabBtn.Parent = Sidebar
+        TabBtn.Size = UDim2.new(1, -10, 0, 35)
+        TabBtn.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+        TabBtn.BackgroundTransparency = 1
+        TabBtn.Font = Enum.Font.Gotham
+        TabBtn.Text = "  " .. name
+        TabBtn.TextColor3 = Color3.fromRGB(180, 180, 180)
+        TabBtn.TextSize = 14
+        TabBtn.TextXAlignment = Enum.TextXAlignment.Left
+
+        TabCorner.CornerRadius = UDim.new(0, 6)
+        TabCorner.Parent = TabBtn
+
+        -- Página da Aba
+        TabPage.Name = name .. "Page"
+        TabPage.Parent = ContentContainer
+        TabPage.Size = UDim2.new(1, 0, 1, 0)
+        TabPage.BackgroundTransparency = 1
+        TabPage.Visible = false
+        TabPage.ScrollBarThickness = 2
+        
+        TabList.Parent = TabPage
+        TabList.Padding = UDim.new(0, 8)
+
+        if FirstTab then
+            TabPage.Visible = true
+            TabBtn.TextColor3 = Color3.fromRGB(0, 80, 200)
+            FirstTab = false
+        end
 
         TabBtn.MouseButton1Click:Connect(function()
-            for _, p in pairs(Content:GetChildren()) do if p:IsA("ScrollingFrame") then p.Visible = false end end
-            Page.Visible = true
+            for _, v in pairs(ContentContainer:GetChildren()) do
+                v.Visible = false
+            end
+            for _, v in pairs(Sidebar:GetChildren()) do
+                if v:IsA("TextButton") then v.TextColor3 = Color3.fromRGB(180, 180, 180) end
+            end
+            TabPage.Visible = true
+            TabBtn.TextColor3 = Color3.fromRGB(0, 80, 200)
         end)
 
         local Elements = {}
-
-        -- INPUT COM TEXTO GRANDE
-        function Elements:CreateInput(text, placeholder, callback)
-            local IFrame = Instance.new("Frame")
-            IFrame.Size = UDim2.new(1, 0, 0, 50)
-            IFrame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            IFrame.Parent = Page
-            Instance.new("UICorner", IFrame)
-
-            local Lab = Instance.new("TextLabel")
-            Lab.Size = UDim2.new(0, 150, 1, 0)
-            Lab.Position = UDim2.new(0, 15, 0, 0)
-            Lab.Text = text
-            Lab.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Lab.TextSize = 16 -- TEXTO MAIOR
-            Lab.Font = Enum.Font.GothamBold
-            Lab.BackgroundTransparency = 1
-            Lab.TextXAlignment = Enum.TextXAlignment.Left
-            Lab.Parent = IFrame
-
-            local Box = Instance.new("TextBox")
-            Box.Size = UDim2.new(0, 200, 0, 35)
-            Box.Position = UDim2.new(1, -215, 0.5, -17)
-            Box.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
-            Box.TextSize = 16 -- INPUT MAIOR
-            Box.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Box.PlaceholderText = placeholder
-            Box.Font = Enum.Font.Gotham
-            Box.Parent = IFrame
-            Instance.new("UICorner", Box)
+        
+        function Elements:CreateButton(text, callback)
+            local b = Instance.new("TextButton")
+            local bc = Instance.new("UICorner")
+            b.Parent = TabPage
+            b.Size = UDim2.new(1, -10, 0, 40)
+            b.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+            b.Font = Enum.Font.GothamMedium
+            b.Text = text
+            b.TextColor3 = Color3.fromRGB(255, 255, 255)
+            b.TextSize = 14
+            bc.CornerRadius = UDim.new(0, 8)
+            bc.Parent = b
             
-            Box.FocusLost:Connect(function() callback(Box.Text) end)
-        end
-
-        function Elements:CreateToggle(text, callback)
-            local Tgl = Instance.new("TextButton")
-            Tgl.Size = UDim2.new(1, 0, 0, 45)
-            Tgl.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-            Tgl.Text = "    " .. text
-            Tgl.Font = Enum.Font.GothamBold
-            Tgl.TextColor3 = Color3.fromRGB(255, 255, 255)
-            Tgl.TextSize = 16
-            Tgl.TextXAlignment = Enum.TextXAlignment.Left
-            Tgl.Parent = Page
-            Instance.new("UICorner", Tgl)
-            
-            local on = false
-            Tgl.MouseButton1Click:Connect(function()
-                on = not on
-                Tgl.BackgroundColor3 = on and Color3.fromRGB(60, 60, 60) or Color3.fromRGB(30, 30, 30)
-                callback(on)
+            b.MouseButton1Click:Connect(function()
+                callback()
             end)
         end
 
         return Elements
     end
+
     return Tabs
 end
 
-return SaldLib
+-- --- EXEMPLO DE USO DA LIB ---
+local lib = SaldHub:CreateWindow()
+
+local Tab1 = lib:CreateTab("Main")
+Tab1:CreateButton("Auto Farm (Exemplo)", function()
+    print("Auto Farm Ativado!")
+end)
+
+local Tab2 = lib:CreateTab("Farming")
+Tab2:CreateButton("Farm Baús", function()
+    print("Farmando Baús...")
+end)
+
+local Tab3 = lib:CreateTab("Settings")
+Tab3:CreateButton("Destruir UI", function()
+    game.Players.LocalPlayer.PlayerGui.SaldHub_Lib:Destroy()
+end)
 
